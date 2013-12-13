@@ -1,0 +1,321 @@
+﻿<script src="threejs/three.js"></script>
+<link rel="import" href="../polymer/polymer.html">
+<polymer-element name="three-js" on-three-js-get-renderer="{{getRenderer}}" on-track="{{track}}">
+  <template>
+    <style>
+      :host {
+        display: block;
+        position: relative;
+      }
+      canvas {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+      }
+    </style>
+  </template>
+  <script>
+    Polymer('three-js', {
+      ready: function() {
+        var renderer = new THREE.WebGLRenderer({antialias: true});
+        this.shadowRoot.appendChild(renderer.domElement);
+        this.renderer = renderer;
+        renderer.setSize(this.offsetWidth, this.offsetHeight);
+        renderer.shadowMapEnabled = true;
+        renderer.shadowMapType = THREE.PCFShadowMap;
+        this.scene = new THREE.Scene;
+        this.invalidate();
+      },
+      invalidate: function() {
+        this.validateJob = this.job(this.validateJob, this.validate, 250);
+      },
+      validate: function() {
+        (this.validateJob || this.nullJob).stop();
+        this.render();
+      },
+      nullJob: {
+        stop: function(){}
+      },
+      render: function() {
+        if (this.camera) {
+          this.renderer.render(this.scene, this.camera);
+        } else console.log('no camera');
+      },
+      add3: function(child) {
+        if (child.localName === 'three-js-camera') {
+          this.camera = child.object;
+          //console.log(child.object);
+        }
+        this.scene.add(child.object);
+        this.invalidate();
+      },
+      remove3: function(child) {
+        this.scene.remove(child.object);
+        this.invalidate();
+      },
+      getRenderer: function(event) {
+        event.detail.renderer = this.renderer;
+        //return this.renderer;
+      },
+      //
+      track: function(event) {
+        var obj = this.camera;
+        var obj = this.querySelector('[tracking]').object;
+        if (obj) {
+          // TODO(sjmiles): accumulating derivatives is numerically unstable
+          // integrating samples over a single track sequence is a better practice
+          // make this easier to do properly
+          obj.position.x += event.ddx;
+          obj.position.z += event.ddy;
+          this.render();
+        }
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-object" attributes="x y z rx ry rz castShadow receiveShadow">
+  <script>
+    Polymer('three-js-object', {
+      x: 0,
+      y: 0,
+      z: 0,
+      rx: 0,
+      ry: 0,
+      rz: 0,
+      castShadow: false,
+      receiveShadow: false,
+      observe: {
+       x: 'positionChanged',
+       y: 'positionChanged',
+       z: 'positionChanged'
+      },
+      setPosition: function(x, y, z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+      },
+      objectChanged: function() {
+        this.updatePosition();
+      },
+      updatePosition: function() {
+        if (this.object) {
+          this.object.position.set(this.x, this.y, this.z);
+          this.object.rotation.set(this.rx * Math.PI/180, this.ry * Math.PI/180, this.rz * Math.PI/180);
+          this.object.castShadow = this.castShadow;
+          this.object.receiveShadow = this.receiveShadow;
+        }
+      },
+      /*get position() {
+        return {x: this.x, y: this.y, z: this.z};
+      },*/
+      addToParent3: function() {
+        if (this.parentNode.add3 && !this.objectParent) {
+          this.objectParent = this.parentNode;
+          this.parentNode.add3(this);
+          console.log('[%s]: added to threejs-objectParent', this.localName + (this.id ? '#' + this.id : ''));
+        }
+      },
+      removeFromParent3: function() {
+        if (this.objectParent) {
+          this.objectParent.remove3(this);
+          this.objectParent = null;
+          console.log('[%s]: REMOVED from threejs-objectParent', this.localName + (this.id ? '#' + this.id : ''));
+        }
+      },
+      enteredView: function() {
+        /*
+        var l = '';
+        var p = this.parentNode;
+        while (p) {
+          l += ':' + p.localName;
+          p = p.parentNode || p.host;
+        }
+        console.log('[%s]: enteredView: parent chain: [%s]', this.localName + (this.id ? '#' + this.id : ''), l);
+        */
+        this.addToParent3();
+      },
+      leftView: function() {
+        this.removeFromParent3();
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-camera" extends="three-js-object" attributes="aspect fov lookAt">
+  <script>
+    Polymer('three-js-camera', {
+      lookAt: '',
+      aspect: 16 / 9,
+      fov: 45,
+      object: null,
+      ready: function() {
+        this.object = new THREE.PerspectiveCamera(this.fov, this.aspect, 0.1, 10000);
+      },
+      updatePosition: function() {
+        this.super();
+        this.lookAtChanged();
+      },
+      lookAtChanged: function() {
+        var node = this.parentNode.querySelector(this.lookAt);
+        if (node /*&& node.object*/) {
+          this.object.lookAt(node);
+        }
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-light" extends="three-js-object" attributes="kind color intensity distance angle exponent shadow">
+  <script>
+    Polymer('three-js-light', {
+      kinds: {
+        point: 'PointLight',
+        spot: 'SpotLight'
+      },
+      color: 0xFFFFFF,
+      shadow: false,
+      intensity: 1,
+      distance: 0,
+      angle: 60,
+      exponent: 8,
+      ready: function() {
+        var kind = this.kinds[this.kind] || this.kinds.point;
+        this.object = new THREE[kind](this.color, this.intensity, this.distance, this.angle * Math.PI/180, this.exponent);
+        if (this.shadow) {
+          this.object.castShadow = true;
+          this.object.shadowMapWidth = 1024;
+          this.object.shadowMapHeight = 1024;
+          this.object.shadowCameraNear = 500;
+          this.object.shadowCameraFar = 4000;
+          this.object.shadowCameraFov = 30;
+          this.object.shadowBias = 0.0001;
+          this.object.shadowDarkness = 0.5;
+        }
+      },
+      updatePosition: function() {
+        this.super();
+        //console.log('updatePosition:', this.kind, this)
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-mesh" extends="three-js-object">
+  <script>
+    Polymer('three-js-mesh', {
+      ready: function() {
+      },
+      validate: function() {
+        var g = this.querySelector('three-js-geometry');
+        this.geometry = g ? g.object : null;
+        var m = this.querySelector('three-js-material');
+        this.material = m ? m.object : null;
+        if (this.geometry && this.material && !this.objectParent) {
+          this.removeFromParent3();
+          this.object = new THREE.Mesh(this.geometry, this.material);
+          this.addToParent3();
+        }
+      },
+      enteredView: function() {
+        //this.super();
+        this.async('validate');
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-material" attributes="kind color side texture ambient specular shine shading">
+  <script>
+    Polymer('three-js-material', {
+      kinds: {
+        basic: 'MeshBasicMaterial',
+        lambert: 'MeshLambertMaterial',
+        phong: 'MeshPhongMaterial',
+        texture: 'texture'
+      },
+      sides: {
+        front: 'FrontSide',
+        back: 'BackSide',
+        double: 'DoubleSide'
+      },
+      shadings: {
+        flat: 'FlatShading'
+      },
+      //ambient: 0,
+      //specular: 0,
+      //shininess: 30,
+      color: 0x1EC876,
+      texture: '',
+      init: function() {
+        var kind = this.kinds[this.kind] || this.kinds.lambert;
+        var side = this.sides[this.side] || this.sides.front;
+        var shading = this.shadings[this.shading] || this.shadings.flat;
+        switch (kind) {
+          case 'texture':
+            var texture = THREE.ImageUtils.loadTexture(this.texture);
+            var detail = this.fire('three-js-get-renderer', {});
+            if (detail) {
+              texture.anisotropy = detail.renderer.getMaxAnisotropy();
+            }
+            this.object = new THREE.MeshBasicMaterial({map: texture, side: THREE[side]});
+            break;
+          default:
+            this.object = new (THREE[kind])({color: this.color,
+              side: THREE[side], specular: this.specular,
+              shininess: this.shine, ambient: this.ambient,
+              shading: THREE[shading]});
+            break;
+        }
+      },
+      enteredView: function() {
+        this.init();
+        this.super();
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-geometry" attributes="w h d extent">
+  <script>
+    Polymer('three-js-geometry', {
+      w: 100,
+      h: 100,
+      d: 100,
+      extent: 0,
+      ready: function() {
+        this.extentChanged();
+        this.object = new THREE.CubeGeometry(this.w, this.h, this.d);
+      },
+      extentChanged: function() {
+        if (this.extent) {
+          this.w = this.h = this.d = this.extent;
+        }
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-cube" extends="three-js-mesh" attributes="color" noscript lightdom>
+  <template>
+    <three-js-geometry></three-js-geometry>
+    <three-js-material kind="lambert" color="{{color}}"></three-js-material>
+  </template>
+</polymer-element>
+
+<!-- prototype chain not supported for second argument to Polymer() -->
+
+<!--<polymer-element name="real-three-js-light">
+  <script>
+    (function() {
+      var proto = Object.create(THREE.PointLight.prototype);
+      proto.ready = function() {
+        THREE.PointLight.call(this);
+        //console.dir(this);
+      }
+      Polymer('real-three-js-light', proto);
+    })();
+  </script>
+</polymer-element>-->

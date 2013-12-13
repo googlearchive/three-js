@@ -1,0 +1,51 @@
+﻿<!doctype html>
+<html>
+<head>
+  <title></title>
+  <script src="../platform/platform.js"></script>
+  <link rel="import" href="three-js.html">
+  <style>
+    html, body, three-js {
+      margin: 0;
+      position: relative;
+      height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <three-js>
+    <three-js-mesh id="skybox">
+      <three-js-geometry extent="15000"></three-js-geometry>
+      <three-js-material kind="texture" texture="textures/sky.png" side="back"></three-js-material>
+    </three-js-mesh>
+
+    <three-js-mesh id="floor" y="-50">
+      <three-js-geometry w="5000" h="1" d="5000"></three-js-geometry>
+      <!--<three-js-material kind="phong" color="0xFF0000" ambient="0x030303" specular="0x009900" shine="30" side="double"></three-js-material>-->
+      <three-js-material kind="texture" texture="textures/chrome-pony.png" side="double"></three-js-material>
+    </three-js-mesh>
+
+    <three-js-light x="50" y="30" z="200"></three-js-light>
+    <three-js-light kind="spot" x="-150" y="350" rx="90" shadow></three-js-light>
+
+    <three-js-mesh x="200">
+      <three-js-geometry></three-js-geometry>
+      <three-js-material kind="texture" texture="textures/chrome-pony.png"></three-js-material>
+    </three-js-mesh>
+
+    <three-js-mesh id="cube" ry="45">
+      <three-js-geometry></three-js-geometry>
+      <three-js-material kind="texture" texture="textures/crate.gif"></three-js-material>
+    </three-js-mesh>
+
+    <three-js-mesh ry="25" y="100">
+      <three-js-geometry></three-js-geometry>
+      <three-js-material kind="texture" texture="textures/crate.gif"></three-js-material>
+    </three-js-mesh>
+
+    <three-js-cube x="-200"></three-js-cube>
+
+    <three-js-camera tracking y="10" z="600" lookAt="#floor"></three-js-camera>
+  </three-js>
+</body>
+</html>
