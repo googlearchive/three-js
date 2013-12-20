@@ -80,7 +80,7 @@
   </script>
 </polymer-element>
 
-<polymer-element name="three-js-object" attributes="x y z rx ry rz castShadow receiveShadow">
+<polymer-element name="three-js-object" attributes="x y z rx ry rz castShadow receiveShadow tracking">
   <script>
     Polymer('three-js-object', {
       x: 0,
@@ -91,6 +91,7 @@
       rz: 0,
       castShadow: false,
       receiveShadow: false,
+      tracking: false,
       observe: {
        x: 'updatePosition',
        y: 'updatePosition',
