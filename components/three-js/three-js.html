@@ -28,6 +28,7 @@
         renderer.shadowMapType = THREE.PCFShadowMap;
         this.scene = new THREE.Scene;
         this.invalidate();
+        console.log('[%s]: ready', this.localName, this.renderer);
       },
       renderNowChanged: function() {
         this.render();
@@ -120,14 +121,14 @@
         if (this.parentNode.add3 && !this.objectParent) {
           this.objectParent = this.parentNode;
           this.parentNode.add3(this);
-          console.log('[%s]: added to threejs-objectParent', this.localName + (this.id ? '#' + this.id : ''));
+          //console.log('[%s]: added to threejs-object parent', this.localName + (this.id ? '#' + this.id : ''));
         }
       },
       removeFromParent3: function() {
         if (this.objectParent) {
           this.objectParent.remove3(this);
           this.objectParent = null;
-          console.log('[%s]: REMOVED from threejs-objectParent', this.localName + (this.id ? '#' + this.id : ''));
+          //console.log('[%s]: REMOVED from threejs-object parent', this.localName + (this.id ? '#' + this.id : ''));
         }
       },
       enteredView: function() {
@@ -140,6 +141,12 @@
         }
         console.log('[%s]: enteredView: parent chain: [%s]', this.localName + (this.id ? '#' + this.id : ''), l);
         */
+        this.async(function() {
+          //console.log('[%s]: lightDomReady', this.localName);
+          this.lightDomReady();
+        });
+      },
+      lightDomReady: function() {
         this.addToParent3();
       },
       leftView: function() {
@@ -208,25 +215,40 @@
   </script>
 </polymer-element>
 
-<polymer-element name="three-js-mesh" extends="three-js-object">
+<polymer-element name="three-js-mesh" extends="three-js-object" on-three-js-material-changed="{{doMaterialChanged}}">
   <script>
     Polymer('three-js-mesh', {
       ready: function() {
+        //this.validate();
+        this.observeDOM();
+      },
+      observeDOM: function() {
+        this.onMutation(this, function() {
+          this.validate();
+          this.observeDOM();
+        });
       },
       validate: function() {
-        var g = this.querySelector('three-js-geometry');
-        this.geometry = g ? g.object : null;
-        var m = this.querySelector('three-js-material');
-        this.material = m ? m.object : null;
-        if (this.geometry && this.material && !this.objectParent) {
-          this.removeFromParent3();
-          this.object = new THREE.Mesh(this.geometry, this.material);
-          this.addToParent3();
+        if (!this.objectParent) {
+          if (!this.geometry) {
+            var g = this.querySelector('three-js-geometry');
+            this.geometry = g ? g.object : null;
+          }
+          if (this.geometry && this.material) {
+            //this.removeFromParent3();
+            this.object = new THREE.Mesh(this.geometry, this.material);
+            this.addToParent3();
+          }
         }
       },
-      enteredView: function() {
-        //this.super();
-        this.async('validate');
+      lightDomReady: function() {
+        // stub out super class version, we don't enter the
+        // scene graph until our geometry and material are both ready
+      },
+      doMaterialChanged: function(event, material) {
+        this.material = material;
+        this.validate();
+        event.stopPropagation();
       }
     });
   </script>
@@ -254,6 +276,16 @@
       //shininess: 30,
       color: 0x1EC876,
       texture: '',
+      enteredView: function() {
+        this.async(function() {
+          //console.log('[%s]: lightDomReady', this.localName);
+          this.lightDomReady();
+        });
+      },
+      lightDomReady: function() {
+        this.init();
+        //this.super();
+      },
       init: function() {
         var kind = this.kinds[this.kind] || this.kinds.lambert;
         var side = this.sides[this.side] || this.sides.front;
@@ -261,23 +293,28 @@
         switch (kind) {
           case 'texture':
             var texture = THREE.ImageUtils.loadTexture(this.texture);
-            var detail = this.fire('three-js-get-renderer', {});
-            if (detail) {
-              texture.anisotropy = detail.renderer.getMaxAnisotropy();
+            var renderer = this.fire('three-js-get-renderer').detail.renderer;
+            if (renderer) {
+              texture.anisotropy = renderer.getMaxAnisotropy();
+            } else {
+              console.log('no renderer');
             }
             this.object = new THREE.MeshBasicMaterial({map: texture, side: THREE[side]});
             break;
           default:
-            this.object = new (THREE[kind])({color: this.color,
-              side: THREE[side], specular: this.specular,
-              shininess: this.shine, ambient: this.ambient,
-              shading: THREE[shading]});
+            this.object = new (THREE[kind])({
+              color: this.color,
+              side: THREE[side],
+              specular: this.specular,
+              shininess: this.shine,
+              ambient: this.ambient,
+              shading: THREE[shading]
+            });
             break;
         }
       },
-      enteredView: function() {
-        this.init();
-        this.super();
+      objectChanged: function() {
+        this.fire('three-js-material-changed', this.object);
       }
     });
   </script>
