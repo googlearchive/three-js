@@ -140,7 +140,7 @@
           //console.log('[%s]: REMOVED from threejs-object parent', this.localName + (this.id ? '#' + this.id : ''));
         }
       },
-      enteredView: function() {
+      attached: function() {
         /*
         var l = '';
         var p = this.parentNode;
@@ -148,7 +148,7 @@
           l += ':' + p.localName;
           p = p.parentNode || p.host;
         }
-        console.log('[%s]: enteredView: parent chain: [%s]', this.localName + (this.id ? '#' + this.id : ''), l);
+        console.log('[%s]: attached: parent chain: [%s]', this.localName + (this.id ? '#' + this.id : ''), l);
         */
         this.async(function() {
           //console.log('[%s]: lightDomReady', this.localName);
@@ -158,7 +158,7 @@
       lightDomReady: function() {
         this.addToParent3();
       },
-      leftView: function() {
+      detached: function() {
         this.removeFromParent3();
       }
     });
@@ -285,7 +285,7 @@
       //shininess: 30,
       color: 0x1EC876,
       texture: '',
-      enteredView: function() {
+      attached: function() {
         this.async(function() {
           //console.log('[%s]: lightDomReady', this.localName);
           this.lightDomReady();
