@@ -9,6 +9,7 @@
 -->
 <script src="threejs/three.js"></script>
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-resizable/core-resizable.html">
 <polymer-element name="three-js" on-three-js-get-renderer="{{getRenderer}}" on-track="{{track}}" attributes="renderNow">
   <template>
     <style>
@@ -26,7 +27,7 @@
     </style>
   </template>
   <script>
-    Polymer('three-js', {
+    Polymer(Polymer.mixin({
       renderNow: false,
       ready: function() {
         var renderer = new THREE.WebGLRenderer({antialias: true});
@@ -57,6 +58,10 @@
           this.renderer.render(this.scene, this.camera);
         } else console.log('no camera');
       },
+      updateSize: function(){
+        this.renderer.setSize(this.offsetWidth, this.offsetHeight);
+        this.render();
+      },
       add3: function(child) {
         if (child.localName === 'three-js-camera') {
           this.camera = child.object;
@@ -85,8 +90,17 @@
           obj.position.z += event.ddy;
           this.render();
         }
+      },
+      attached: function(){
+        this.resizableAttachedHandler();
+      },
+      detached: function(){
+        this.resizableDetachedHandler();
+      },
+      eventDelegates: {
+        'core-resize': 'updateSize'
       }
-    });
+    },Polymer.CoreResizable));
   </script>
 </polymer-element>
 
