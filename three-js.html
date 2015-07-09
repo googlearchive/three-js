@@ -32,7 +32,7 @@
         var renderer = new THREE.WebGLRenderer({antialias: true});
         this.shadowRoot.appendChild(renderer.domElement);
         this.renderer = renderer;
-        renderer.setSize(this.offsetWidth, this.offsetHeight);
+        renderer.setSize(500, 500);
         renderer.shadowMapEnabled = true;
         renderer.shadowMapType = THREE.PCFShadowMap;
         this.scene = new THREE.Scene;
@@ -54,7 +54,9 @@
       },
       render: function() {
         if (this.camera) {
-          this.renderer.render(this.scene, this.camera);
+            //this.camera.lookAt(new THREE.Vector3(0,0,0));
+            console.log(this.scene);
+            this.renderer.render(this.scene, this.camera);
         } else console.log('no camera');
       },
       add3: function(child) {
@@ -224,7 +226,7 @@
   </script>
 </polymer-element>
 
-<polymer-element name="three-js-mesh" extends="three-js-object" on-three-js-material-changed="{{doMaterialChanged}}">
+<polymer-element name="three-js-mesh" extends="three-js-object" on-three-js-material-changed="{{doMaterialChanged}}" on-three-js-geometry-changed="{{doGeometryChanged}}">
   <script>
     Polymer('three-js-mesh', {
       ready: function() {
@@ -238,7 +240,9 @@
         });
       },
       validate: function() {
-        if (!this.objectParent) {
+          if (this.objectParent) {
+              this.removeFromParent3();
+          }
           if (!this.geometry) {
             var g = this.querySelector('three-js-geometry');
             this.geometry = g ? g.object : null;
@@ -248,7 +252,6 @@
             this.object = new THREE.Mesh(this.geometry, this.material);
             this.addToParent3();
           }
-        }
       },
       lightDomReady: function() {
         // stub out super class version, we don't enter the
@@ -258,7 +261,13 @@
         this.material = material;
         this.validate();
         event.stopPropagation();
-      }
+    },
+    doGeometryChanged: function(event, geometry) {
+      this.geometry = geometry;
+      console.log("New geom set");
+      this.validate();
+      event.stopPropagation();
+  },
     });
   </script>
 </polymer-element>
@@ -336,6 +345,11 @@
       h: 100,
       d: 100,
       extent: 0,
+      observe: {
+          'w' : 'newGeo',
+          'h' : 'newGeo',
+          'd' : 'newGeo',
+      },
       ready: function() {
         this.extentChanged();
         this.object = new THREE.CubeGeometry(this.w, this.h, this.d);
@@ -344,7 +358,12 @@
         if (this.extent) {
           this.w = this.h = this.d = this.extent;
         }
-      }
+    },
+      newGeo : function() {
+        console.log("New Geo called");
+        this.object = new THREE.CubeGeometry(this.w, this.h, this.d);
+        this.fire('three-js-geometry-changed', this.object);
+    },
     });
   </script>
 </polymer-element>
