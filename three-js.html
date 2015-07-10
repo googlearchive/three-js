@@ -32,7 +32,10 @@
         var renderer = new THREE.WebGLRenderer({antialias: true});
         this.shadowRoot.appendChild(renderer.domElement);
         this.renderer = renderer;
-        renderer.setSize(500, 500);
+        if (this.offsetWidth ==0 || this.offsetHeight == 0 )
+            renderer.setSize(500, 500);
+        else
+            renderer.setSize(this.offsetWidth,this.offsetHeight)
         renderer.shadowMapEnabled = true;
         renderer.shadowMapType = THREE.PCFShadowMap;
         this.scene = new THREE.Scene;
@@ -53,9 +56,16 @@
         stop: function(){}
       },
       render: function() {
-        if (this.camera) {
-            console.log(this.scene);
-            this.renderer.render(this.scene, this.camera);
+        if (this instanceof Window) {
+            threejsTag = document.getElementsByTagName('three-js')[0];
+        }
+        else {
+            threejsTag = this;
+        }
+            window.requestAnimationFrame(threejsTag.render);
+        if (threejsTag.camera) {
+            console.log(threejsTag.scene);
+            threejsTag.renderer.render(threejsTag.scene, threejsTag.camera);
         } else console.log('no camera');
       },
       add3: function(child) {
