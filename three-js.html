@@ -30,15 +30,16 @@
     Polymer('three-js', {
       renderNow: false,
       ready: function() {
-        var renderer = new THREE.WebGLRenderer({antialias: true});
+        var renderer = new THREE.WebGLRenderer({antialias: true, alpha:true});
         this.shadowRoot.appendChild(renderer.domElement);
         this.renderer = renderer;
         if (this.offsetWidth ==0 || this.offsetHeight == 0 )
-            renderer.setSize(500, 500);
+            renderer.setSize(1000, 562);
         else
             renderer.setSize(this.offsetWidth,this.offsetHeight)
         renderer.shadowMapEnabled = true;
         renderer.shadowMapType = THREE.PCFShadowMap;
+        renderer.setClearColor(0x000000, 0);
         this.scene = new THREE.Scene;
         this.invalidate();
         console.log('[%s]: ready', this.localName, this.renderer);
@@ -60,7 +61,7 @@
         var self=this
         window.requestAnimationFrame(function () { self.render() });
         if (this.camera) {
-            console.log(this.scene);
+            //console.log(this.scene);
             this.controls.update();
             this.renderer.render(this.scene, this.camera);
         } else console.log('no camera');
@@ -207,7 +208,8 @@
     Polymer('three-js-light', {
       kinds: {
         point: 'PointLight',
-        spot: 'SpotLight'
+        spot: 'SpotLight',
+        ambient: 'AmbientLight',
       },
       color: 0xFFFFFF,
       shadow: false,
@@ -217,6 +219,7 @@
       exponent: 8,
       ready: function() {
         var kind = this.kinds[this.kind] || this.kinds.point;
+        //console.log(kind);
         this.object = new THREE[kind](this.color, this.intensity, this.distance, this.angle * Math.PI/180, this.exponent);
         if (this.shadow) {
           this.object.castShadow = true;
@@ -275,7 +278,7 @@
     },
     doGeometryChanged: function(event, geometry) {
       this.geometry = geometry;
-      console.log("New geom set");
+      //console.log("New geom set");
       this.validate();
       event.stopPropagation();
   },
@@ -371,7 +374,7 @@
         }
     },
       newGeo : function() {
-        console.log("New Geo called");
+        //console.log("New Geo called");
         this.object = new THREE.CubeGeometry(this.w, this.h, this.d);
         this.fire('three-js-geometry-changed', this.object);
     },
