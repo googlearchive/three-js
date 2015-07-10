@@ -347,7 +347,10 @@
       },
       objectChanged: function() {
         this.fire('three-js-material-changed', this.object);
-      }
+      },
+      observe : {
+        'color' : 'init',
+      },
     });
   </script>
 </polymer-element>
