@@ -54,7 +54,6 @@
       },
       render: function() {
         if (this.camera) {
-            //this.camera.lookAt(new THREE.Vector3(0,0,0));
             console.log(this.scene);
             this.renderer.render(this.scene, this.camera);
         } else console.log('no camera');
@@ -62,6 +61,7 @@
       add3: function(child) {
         if (child.localName === 'three-js-camera') {
           this.camera = child.object;
+          this.camera.lookAt(new THREE.Vector3(0,0,0));
           //console.log(child.object);
         }
         this.scene.add(child.object);
@@ -174,6 +174,9 @@
       aspect: 16 / 9,
       fov: 45,
       object: null,
+      observe: {
+      'lookAt': 'lookAtChanged',
+      },
       ready: function() {
         this.object = new THREE.PerspectiveCamera(this.fov, this.aspect, 0.1, 10000);
       },
