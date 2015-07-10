@@ -366,7 +366,7 @@
       },
       ready: function() {
         this.extentChanged();
-        this.object = new THREE.CubeGeometry(this.w, this.h, this.d);
+        this.object = new THREE.BoxGeometry(this.w, this.h, this.d);
       },
       extentChanged: function() {
         if (this.extent) {
@@ -375,7 +375,7 @@
     },
       newGeo : function() {
         //console.log("New Geo called");
-        this.object = new THREE.CubeGeometry(this.w, this.h, this.d);
+        this.object = new THREE.BoxGeometry(this.w, this.h, this.d);
         this.fire('three-js-geometry-changed', this.object);
     },
     });
