@@ -8,6 +8,7 @@
     subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
 -->
 <script src="threejs/three.js"></script>
+<script src="threejs/TrackballControls.js"></script>
 <link rel="import" href="../polymer/polymer.html">
 <polymer-element name="three-js" on-three-js-get-renderer="{{getRenderer}}" on-track="{{track}}" attributes="renderNow">
   <template>
@@ -65,6 +66,7 @@
             window.requestAnimationFrame(threejsTag.render);
         if (threejsTag.camera) {
             console.log(threejsTag.scene);
+            threejsTag.controls.update();
             threejsTag.renderer.render(threejsTag.scene, threejsTag.camera);
         } else console.log('no camera');
       },
@@ -72,6 +74,7 @@
         if (child.localName === 'three-js-camera') {
           this.camera = child.object;
           this.camera.lookAt(new THREE.Vector3(0,0,0));
+          this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
           //console.log(child.object);
         }
         this.scene.add(child.object);
