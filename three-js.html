@@ -57,17 +57,12 @@
         stop: function(){}
       },
       render: function() {
-        if (this instanceof Window) {
-            threejsTag = document.getElementsByTagName('three-js')[0];
-        }
-        else {
-            threejsTag = this;
-        }
-            window.requestAnimationFrame(threejsTag.render);
-        if (threejsTag.camera) {
-            console.log(threejsTag.scene);
-            threejsTag.controls.update();
-            threejsTag.renderer.render(threejsTag.scene, threejsTag.camera);
+        var self=this
+        window.requestAnimationFrame(function () { self.render() });
+        if (this.camera) {
+            console.log(this.scene);
+            this.controls.update();
+            this.renderer.render(this.scene, this.camera);
         } else console.log('no camera');
       },
       add3: function(child) {
