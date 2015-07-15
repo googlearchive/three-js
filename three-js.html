@@ -429,6 +429,7 @@
       pyramid.faces.push(new THREE.Face3(3, 0, 4));
       pyramid.faces.push(new THREE.Face3(0, 2, 1));
       pyramid.faces.push(new THREE.Face3(0, 3, 2));
+      pyramid.computeFaceNormals();
       pyramid.computeBoundingSphere();
       this.object = pyramid;
       this.fire('three-js-geometry-changed', this.object);
