@@ -295,6 +295,7 @@
         basic: 'MeshBasicMaterial',
         lambert: 'MeshLambertMaterial',
         phong: 'MeshPhongMaterial',
+        normal: 'MeshNormalMaterial',
         texture: 'texture'
       },
       sides: {
@@ -448,6 +449,83 @@
     },
     });
   </script>
+</polymer-element>
+
+<polymer-element name="three-js-parametric" attributes="slices stacks">
+  <script>
+    Polymer('three-js-parametric', {
+      domReady: function() {
+        this.newGeo();
+      },
+      newGeo : function() {
+        this.object = new THREE.Geometry();
+        var verts = this.object.vertices;
+	    var faces = this.object.faces;
+	    var uvs = this.object.faceVertexUvs[ 0 ];
+        
+        this.count = 0; //Keep track of number of vertices added. 
+
+        var i, j, p;
+	    var u, v;
+        
+        var slices = Number(this.slices);
+        var stacks = Number(this.stacks);
+        //console.log(slices, stacks);
+        this.length = (slices+1) * (stacks+1); //Total number of vertices.
+	    var sliceCount = slices + 1;
+        var a, b, c, d;
+	    var uva, uvb, uvc, uvd;
+
+    	for ( i = 0; i < stacks; i ++ ) {
+
+            for ( j = 0; j < slices; j ++ ) {
+                a = i * sliceCount + j;
+                b = i * sliceCount + j + 1;
+                c = (i + 1) * sliceCount + j + 1;
+                d = (i + 1) * sliceCount + j;
+
+                uva = new THREE.Vector2( j / slices, i / stacks );
+                uvb = new THREE.Vector2( ( j + 1 ) / slices, i / stacks );
+                uvc = new THREE.Vector2( ( j + 1 ) / slices, ( i + 1 ) / stacks );
+                uvd = new THREE.Vector2( j / slices, ( i + 1 ) / stacks );
+
+                faces.push( new THREE.Face3( a, b, d ) );
+                uvs.push( [ uva, uvb, uvd ] );
+
+                faces.push( new THREE.Face3( b, c, d ) );
+                uvs.push( [ uvb.clone(), uvc, uvd.clone() ] );
+
+		    }
+	    }
+      },
+      addVertex : function(vertex) {
+        this.object.vertices.push(vertex.object);
+        this.count++;
+        if (this.count == this.length){
+            this.object.computeFaceNormals();
+            this.object.computeVertexNormals();
+            this.fire('three-js-geometry-changed', this.object);
+        }
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-vertex" attributes="x y z color">
+  <script>
+    Polymer('three-js-vertex', {
+      domReady: function() {
+        this.object = new THREE.Vector3(this.x,this.y,this.z);
+        this.addToGeom();     
+    },
+      addToGeom: function(){
+          this.objectParent = this.parentNode;
+          this.parentNode.addVertex(this);
+          console.log('[%s]: added to threejs-geometry parent', this.localName + (this.id ? '#' + this.id : ''));
+    }
+  });
+  </script>
+
 </polymer-element>
 
 <polymer-element name="three-js-pyramid" attributes="base height">
