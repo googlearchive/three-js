@@ -483,18 +483,3 @@
     });
   </script>
 </polymer-element>
-
-<!-- prototype chain not supported for second argument to Polymer() -->
-
-<!--<polymer-element name="real-three-js-light">
-  <script>
-    (function() {
-      var proto = Object.create(THREE.PointLight.prototype);
-      proto.ready = function() {
-        THREE.PointLight.call(this);
-        //console.dir(this);
-      }
-      Polymer('real-three-js-light', proto);
-    })();
-  </script>
-</polymer-element>-->
