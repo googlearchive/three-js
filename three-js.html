@@ -73,6 +73,7 @@
           this.controls = new THREE.TrackballControls(this.camera, this.renderer.domElement);
           //console.log(child.object);
         }
+        //console.log(child.object);
         this.scene.add(child.object);
         this.invalidate();
       },
@@ -194,10 +195,10 @@
         this.lookAtChanged();
       },
       lookAtChanged: function() {
-        var node = this.parentNode.querySelector(this.lookAt);
-        if (node /*&& node.object*/) {
-          this.object.lookAt(node);
-        }
+        //var node = this.parentNode.querySelector(this.lookAt);
+        //if (node /*&& node.object*/) {
+          //this.object.lookAt(node);
+        //}
       }
     });
   </script>
@@ -217,7 +218,7 @@
       distance: 0,
       angle: 60,
       exponent: 8,
-      ready: function() {
+      attached: function() {
         var kind = this.kinds[this.kind] || this.kinds.point;
         //console.log(kind);
         this.object = new THREE[kind](this.color, this.intensity, this.distance, this.angle * Math.PI/180, this.exponent);
@@ -231,6 +232,7 @@
           this.object.shadowBias = 0.0001;
           this.object.shadowDarkness = 0.5;
         }
+        this.addToParent3();
       },
       updatePosition: function() {
         this.super();
@@ -476,7 +478,7 @@
       pyramid.computeFaceNormals();
       pyramid.computeBoundingSphere();
       this.object = pyramid;
-      this.fire('three-js-geometry-changed', this.object);
+//      this.fire('three-js-geometry-changed', this.object);
     },
     });
   </script>
