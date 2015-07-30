@@ -506,6 +506,16 @@
             this.object.computeVertexNormals();
             this.fire('three-js-geometry-changed', this.object);
         }
+    },
+    replaceVertex : function(oldVertex, newVertex) {
+        if (this.object == undefined)
+            return;
+        var index = this.object.vertices.indexOf(oldVertex);
+        this.object.vertices[index] = newVertex;
+        this.object.computeFaceNormals();
+        this.object.computeVertexNormals();
+        this.object.verticesNeedUpdate=true;
+        this.fire('three-js-geometry-changed', this.object);
       }
     });
   </script>
@@ -514,15 +524,27 @@
 <polymer-element name="three-js-vertex" attributes="x y z color">
   <script>
     Polymer('three-js-vertex', {
+      observe: {
+        'x':'replaceInGeom',
+        'y':'replaceInGeom',
+        'z':'replaceInGeom',
+        'color':'replaceInGeom'
+      },
       domReady: function() {
         this.object = new THREE.Vector3(this.x,this.y,this.z);
         this.addToGeom();     
-    },
+      },
       addToGeom: function(){
           this.objectParent = this.parentNode;
           this.parentNode.addVertex(this);
-          console.log('[%s]: added to threejs-geometry parent', this.localName + (this.id ? '#' + this.id : ''));
-    }
+          //console.log('[%s]: added to threejs-geometry parent', this.localName + (this.id ? '#' + this.id : ''));
+      },
+      replaceInGeom: function(oldValue, newValue){
+        this.objectParent = this.parentNode;
+        oldVertex = this.object;
+        this.object = new THREE.Vector3(this.x,this.y,this.z);
+        this.parentNode.replaceVertex(oldVertex,this.object);
+      }
   });
   </script>
 
