@@ -288,7 +288,7 @@
   </script>
 </polymer-element>
 
-<polymer-element name="three-js-material" attributes="kind color side texture ambient specular shine shading wireframe">
+<polymer-element name="three-js-material" attributes="kind color side texture ambient specular shine shading wireframe visible">
   <script>
     Polymer('three-js-material', {
       kinds: {
@@ -345,7 +345,8 @@
               shininess: this.shine,
               ambient: this.ambient,
               shading: THREE[shading],
-              wireframe: this.wireframe
+              wireframe: this.wireframe,
+              visible: this.visible
             });
             break;
         }
