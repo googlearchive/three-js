@@ -75,7 +75,6 @@
         }
         //console.log(child.object);
         this.scene.add(child.object);
-        console.log(this.additionalObject);
         if (child.additionalObject){
             this.scene.add(child.additionalObject);
         }
@@ -272,11 +271,10 @@
           if (this.geometry && this.material) {
             //this.removeFromParent3();
             this.object = new THREE.Mesh(this.geometry, this.material);
-            console.log(this.edges);
-            if(this.edges)
+            var edgesNode = this.querySelector('three-js-edges')
+            if(edgesNode)
             {
-                console.log("Created")
-                this.additionalObject = new THREE.EdgesHelper(this.object, 0x000000)
+                edgesNode.createEdges(this.object);
             }
             this.addToParent3();
         }
@@ -374,6 +372,37 @@
     });
   </script>
 </polymer-element>
+
+<polymer-element name="three-js-edges" attributes="color">
+  <script>
+    Polymer('three-js-edges', {
+        color: 0x000000,
+        lightDomReady : function(){
+        },
+        createEdges: function(mesh){
+            if(mesh){
+                this.object = new THREE.EdgesHelper(mesh,this.color);
+                this.addToParent3();
+            }
+        },
+        addToParent3: function() {
+        if (this.parentNode.parentNode.add3 && !this.objectParent) {
+          this.objectParent = this.parentNode.parentNode;
+          this.parentNode.parentNode.add3(this);
+        }
+      },
+      removeFromParent3: function() {
+        if (this.objectParent) {
+          this.objectParent.remove3(this);
+          this.objectParent = null;
+          //console.log('[%s]: REMOVED from threejs-object parent', this.localName + (this.id ? '#' + this.id : ''));
+        }
+      },
+
+      });
+  </script>
+</polymer-element>
+
 
 <polymer-element name="three-js-box" attributes="w h d extent">
   <script>
