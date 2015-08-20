@@ -75,6 +75,10 @@
         }
         //console.log(child.object);
         this.scene.add(child.object);
+        console.log(this.additionalObject);
+        if (child.additionalObject){
+            this.scene.add(child.additionalObject);
+        }
         this.invalidate();
       },
       remove3: function(child) {
@@ -242,9 +246,11 @@
   </script>
 </polymer-element>
 
-<polymer-element name="three-js-mesh" extends="three-js-object" on-three-js-material-changed="{{doMaterialChanged}}" on-three-js-geometry-changed="{{doGeometryChanged}}">
+<polymer-element name="three-js-mesh" extends="three-js-object" on-three-js-material-changed="{{doMaterialChanged}}" on-three-js-geometry-changed="{{doGeometryChanged}}" attributes="edges">
   <script>
-    Polymer('three-js-mesh', {
+      Polymer('three-js-mesh', {
+      edges: false,
+      additionalObject: false,
       ready: function() {
         //this.validate();
         this.observeDOM();
@@ -266,8 +272,14 @@
           if (this.geometry && this.material) {
             //this.removeFromParent3();
             this.object = new THREE.Mesh(this.geometry, this.material);
+            console.log(this.edges);
+            if(this.edges)
+            {
+                console.log("Created")
+                this.additionalObject = new THREE.EdgesHelper(this.object, 0x000000)
+            }
             this.addToParent3();
-          }
+        }
       },
       lightDomReady: function() {
         // stub out super class version, we don't enter the
@@ -312,6 +324,7 @@
       color: 0x1EC876,
       texture: '',
       wireframe:false,
+      visible:true,
       attached: function() {
         this.async(function() {
           //console.log('[%s]: lightDomReady', this.localName);
@@ -347,9 +360,10 @@
               shading: THREE[shading],
               wireframe: this.wireframe,
               visible: this.visible
-            });
+              });
             break;
-        }
+            }
+            this.object.visible = this.visible
       },
       objectChanged: function() {
         this.fire('three-js-material-changed', this.object);
