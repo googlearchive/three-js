@@ -334,7 +334,6 @@
         });
       },
       detached: function() {
-        this.removeFromParent3();
         this.removeEdgesFromParent3();
       },
       lightDomReady: function() {
@@ -589,6 +588,67 @@
         this.object.computeVertexNormals();
         this.object.verticesNeedUpdate=true;
         this.fire('three-js-geometry-changed', this.object);
+      }
+    });
+  </script>
+</polymer-element>
+
+<polymer-element name="three-js-meshlines" attributes="slices stacks">
+  <script>
+    Polymer('three-js-meshlines', {
+      domReady: function() {
+        this.newGeo();
+      },
+      newGeo : function() {
+        this.object = new THREE.Geometry();
+        this.count = 0; //Keep track of number of vertices added.
+        var slices = Number(this.slices);
+        var stacks = Number(this.stacks);
+        this.length = (slices+1) * (stacks+1);//Total number of vertices.
+    },
+    meshLines : function(){
+        var i, j, p;
+        var slices = Number(this.slices);
+        var stacks = Number(this.stacks);
+	    var sliceCount = slices + 1;
+        var a, b, c, d;
+        var material = new THREE.LineBasicMaterial({color:0xff0000})
+
+        var verts = this.object.vertices;
+        this.lines = []
+    	for ( i = 0; i < stacks; i ++ ) {
+            this.lines.push(new THREE.Geometry());
+            for ( j = 0; j < slices; j ++ ) {
+                a = verts[i * sliceCount + j];
+                this.lines[i].vertices.push(a);
+            }
+            this.newLine = new THREE.Line(this.lines[i],material);
+            this.parentNode.parentNode.scene.add(this.newLine);
+        }
+        for ( i = stacks ; i < slices+stacks; i ++ ) {
+            this.lines.push(new THREE.Geometry());
+            for ( j = 0; j < stacks; j ++ ) {
+                a = verts[j * (stacks+1) + i - stacks];
+                this.lines[i].vertices.push(a);
+            }
+            this.newLine = new THREE.Line(this.lines[i],material);
+            this.parentNode.parentNode.scene.add(this.newLine);
+	    }
+
+      },
+      addVertex : function(vertex) {
+        this.object.vertices.push(vertex.object);
+        this.count++;
+        if (this.count == this.length){
+            this.meshLines();
+        }
+    },
+    replaceVertex : function(oldVertex, newVertex) {
+        if (this.object == undefined)
+            return;
+        var index = this.object.vertices.indexOf(oldVertex);
+        this.object.vertices[index] = newVertex;
+        this.meshLines();
       }
     });
   </script>
