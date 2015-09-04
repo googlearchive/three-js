@@ -393,7 +393,7 @@
       is: 'three-js-camera',
       behaviors: [ThreeJSObjectBehavior],
       properties: {
-        aspect: { notify: true },
+        aspect: { value: 16/9, notify: true },
         fov: {
           type: Number,
           value: 45,
@@ -409,6 +409,69 @@
       ready: function () {
         this.object = new THREE.PerspectiveCamera(this.fov, this.aspect, 0.1, 10000);
         this.object.lookAt(new THREE.Vector3(0, 0, 0));
+        this.addToParent3();
+      },
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-light">
+  <script>
+    Polymer({
+      is: 'three-js-light',
+      kinds: {
+        point: 'PointLight',
+        spot: 'SpotLight',
+        ambient: 'AmbientLight'
+      },
+      properties: {
+        angle: {
+          type: Number,
+          value: 60,
+          notify: true
+        },
+        color: {
+          type: Number,
+          value: 16777215,
+          notify: true
+        },
+        distance: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+        exponent: {
+          type: Number,
+          value: 8,
+          notify: true
+        },
+        intensity: {
+          type: Number,
+          value: 1,
+          notify: true
+        },
+        kind: { notify: true },
+        shadow: {
+          type: Boolean,
+          value: false,
+          notify: true
+        }
+      },
+      behaviors: [ThreeJSObjectBehavior],
+      ready: function () {
+        var kind = this.kinds[this.kind] || this.kinds.point;
+        //console.log(kind);
+        this.object = new THREE[kind](this.color, this.intensity, this.distance, this.angle * Math.PI / 180, this.exponent);
+        if (this.shadow) {
+          this.object.castShadow = true;
+          this.object.shadowMapWidth = 1024;
+          this.object.shadowMapHeight = 1024;
+          this.object.shadowCameraNear = 500;
+          this.object.shadowCameraFar = 4000;
+          this.object.shadowCameraFov = 30;
+          this.object.shadowBias = 0.0001;
+          this.object.shadowDarkness = 0.5;
+        }
         this.addToParent3();
       },
     });
