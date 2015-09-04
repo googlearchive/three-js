@@ -338,55 +338,6 @@
   </script>
 </dom-module>
 
-<dom-module id="three-js-box">
-  <script>
-    Polymer({
-      is: 'three-js-box',
-      properties: {
-        d: {
-          type: Number,
-          value: 100,
-          notify: true,
-          observer: 'newGeo'
-        },
-        extent: {
-          type: Number,
-          value: 0,
-          notify: true,
-          observer: 'extentChanged'
-        },
-        h: {
-          type: Number,
-          value: 100,
-          notify: true,
-          observer: 'newGeo'
-        },
-        w: {
-          type: Number,
-          value: 100,
-          notify: true,
-          observer: 'newGeo'
-        }
-      },
-      ready: function () {
-        this.extentChanged();
-        this.newGeo();
-      },
-      extentChanged: function () {
-        if (this.extent) {
-          this.w = this.h = this.d = this.extent;
-        }
-      },
-      newGeo: function () {
-        //console.log("New Geo called");
-        this.object = new THREE.BoxGeometry(this.w, this.h, this.d);
-        Polymer.dom(this).parentNode.addGeom(this.object);
-      }
-    });
-  </script>
-</dom-module>
-
-
 <dom-module id="three-js-camera">
   <script>
     Polymer({
@@ -474,6 +425,378 @@
         }
         this.addToParent3();
       },
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-box">
+  <script>
+    Polymer({
+      is: 'three-js-box',
+      properties: {
+        d: {
+          type: Number,
+          value: 100,
+          notify: true,
+          observer: 'newGeo'
+        },
+        extent: {
+          type: Number,
+          value: 0,
+          notify: true,
+          observer: 'extentChanged'
+        },
+        h: {
+          type: Number,
+          value: 100,
+          notify: true,
+          observer: 'newGeo'
+        },
+        w: {
+          type: Number,
+          value: 100,
+          notify: true,
+          observer: 'newGeo'
+        }
+      },
+      ready: function () {
+        this.extentChanged();
+        this.newGeo();
+      },
+      extentChanged: function () {
+        if (this.extent) {
+          this.w = this.h = this.d = this.extent;
+        }
+      },
+      newGeo: function () {
+        //console.log("New Geo called");
+        this.object = new THREE.BoxGeometry(this.w, this.h, this.d);
+        Polymer.dom(this).parentNode.addGeom(this.object);
+      }
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-sphere">
+  <script>
+    Polymer({
+      is: 'three-js-sphere',
+      properties: {
+        r: {
+          type: Number,
+          value: 10,
+          notify: true,
+          observer: 'newGeo'
+        }
+      },
+      ready: function () {
+        this.newGeo();
+      },
+      newGeo: function () {
+        this.object = new THREE.SphereGeometry(this.r, 32, 16);
+        Polymer.dom(this).parentNode.addGeom(this.object);
+      }
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-cylinder">
+  <script>
+    Polymer({
+      is: 'three-js-cylinder',
+      properties: {
+        bottom: {
+          type: Number,
+          value: 10,
+          notify: true,
+          observer: 'newGeo'
+        },
+        height: {
+          type: Number,
+          value: 10,
+          notify: true,
+          observer: 'newGeo'
+        },
+        top: {
+          type: Number,
+          value: 10,
+          notify: true,
+          observer: 'newGeo'
+        }
+      },
+      ready: function () {
+        this.newGeo();
+      },
+      newGeo: function () {
+        this.object = new THREE.CylinderGeometry(this.top, this.bottom, this.height, 32, 16);
+        Polymer.dom(this).parentNode.addGeom(this.object);
+      }
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-torus">
+  <script>
+    Polymer({
+      is: 'three-js-torus',
+      properties: {
+        r: {
+          type: Number,
+          value: 10,
+          notify: true,
+          observer: 'newGeo'
+        },
+        tube: {
+          type: Number,
+          value: 10,
+          notify: true,
+          observer: 'newGeo'
+        }
+      },
+      ready: function () {
+        this.newGeo();
+      },
+      newGeo: function () {
+        this.object = new THREE.TorusGeometry(this.r, this.tube, 32, 32);
+        Polymer.dom(this).parentNode.addGeom(this.object);
+      }
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-pyramid">
+<script>
+  Polymer({
+    is: 'three-js-pyramid',
+    properties: {
+      base: {
+        type: Number,
+        value: 5,
+        notify: true,
+        observer: 'newGeo'
+      },
+      height: {
+        type: Number,
+        value: 10,
+        notify: true,
+        observer: 'newGeo'
+      }
+    },
+    ready: function () {
+      this.newGeo();
+    },
+    newGeo: function () {
+      var pyramid = new THREE.Geometry();
+      pyramid.vertices.push(new THREE.Vector3(0, 0, 0));
+      pyramid.vertices.push(new THREE.Vector3(this.base, 0, 0));
+      pyramid.vertices.push(new THREE.Vector3(this.base, 0, this.base));
+      pyramid.vertices.push(new THREE.Vector3(0, 0, this.base));
+      pyramid.vertices.push(new THREE.Vector3(this.base / 2, this.height, this.base / 2));
+      pyramid.faces.push(new THREE.Face3(0, 1, 4));
+      pyramid.faces.push(new THREE.Face3(1, 2, 4));
+      pyramid.faces.push(new THREE.Face3(3, 4, 2));
+      pyramid.faces.push(new THREE.Face3(3, 0, 4));
+      pyramid.faces.push(new THREE.Face3(0, 2, 1));
+      pyramid.faces.push(new THREE.Face3(0, 3, 2));
+      pyramid.computeFaceNormals();
+      pyramid.computeBoundingSphere();
+      this.object = pyramid;
+      Polymer.dom(this).parentNode.addGeom(this.object);
+    }
+  });
+</script>
+</dom-module>
+
+<dom-module id="three-js-vertex">
+  <script>
+    Polymer({
+      is: 'three-js-vertex',
+      properties: {
+        color: {
+          notify: true,
+          observer: 'replaceInGeom'
+        },
+        x: {
+          type: Number,
+          notify: true,
+          observer: 'replaceInGeom'
+        },
+        y: {
+          type: Number,
+          notify: true,
+          observer: 'replaceInGeom'
+        },
+        z: {
+          type: Number,
+          notify: true,
+          observer: 'replaceInGeom'
+        }
+      },
+      addToGeom: function () {
+        this.objectParent = Polymer.dom(this).parentNode;
+        Polymer.dom(this).parentNode.addVertex(this);
+      },
+      //console.log('[%s]: added to threejs-geometry parent', this.localName + (this.id ? '#' + this.id : ''));
+      replaceInGeom: function (newValue, oldValue) {
+        this.objectParent = Polymer.dom(this).parentNode;
+        oldVertex = this.object;
+        this.object = new THREE.Vector3(this.x, this.y, this.z);
+        this.objectParent.replaceVertex(oldVertex, this.object);
+      },
+      ready: function () {
+        this.object = new THREE.Vector3(this.x, this.y, this.z);
+        this.addToGeom();
+      }
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-parametric">
+  <script>
+    Polymer({
+      is: 'three-js-parametric',
+      properties: {
+        slices: {
+          type: Number,
+          notify: true,
+          value: 0
+        },
+        stacks: {
+          type: Number,
+          notify: true,
+          value: 0
+        }
+      },
+      newGeo: function () {
+        this.object = new THREE.Geometry();
+        var verts = this.object.vertices;
+        var faces = this.object.faces;
+        var uvs = this.object.faceVertexUvs[0];
+        this.count = 0;
+        //Keep track of number of vertices added.
+        var i, j, p;
+        var u, v;
+        var slices = Number(this.slices);
+        var stacks = Number(this.stacks);
+        //console.log(slices, stacks);
+        this.length = (slices + 1) * (stacks + 1);
+        //Total number of vertices.
+        var sliceCount = slices + 1;
+        var a, b, c, d;
+        var uva, uvb, uvc, uvd;
+        for (i = 0; i < stacks; i++) {
+          for (j = 0; j < slices; j++) {
+            a = i * sliceCount + j;
+            b = i * sliceCount + j + 1;
+            c = (i + 1) * sliceCount + j + 1;
+            d = (i + 1) * sliceCount + j;
+            uva = new THREE.Vector2(j / slices, i / stacks);
+            uvb = new THREE.Vector2((j + 1) / slices, i / stacks);
+            uvc = new THREE.Vector2((j + 1) / slices, (i + 1) / stacks);
+            uvd = new THREE.Vector2(j / slices, (i + 1) / stacks);
+            faces.push(new THREE.Face3(a, b, d));
+            uvs.push([
+              uva,
+              uvb,
+              uvd
+            ]);
+            faces.push(new THREE.Face3(b, c, d));
+            uvs.push([
+              uvb.clone(),
+              uvc,
+              uvd.clone()
+            ]);
+          }
+        }
+      },
+      addVertex: function (vertex) {
+        this.object.vertices.push(vertex.object);
+        this.count++;
+        if (this.count == this.length) {
+          this.object.computeFaceNormals();
+          this.object.computeVertexNormals();
+          Polymer.dom(this).parentNode.addGeom(this.object);
+        }
+      },
+      replaceVertex: function (oldVertex, newVertex) {
+        if (this.object == undefined || this.count<this.length)
+          return;
+        var index = this.object.vertices.indexOf(oldVertex);
+        this.object.vertices[index] = newVertex;
+        this.object.computeFaceNormals();
+        this.object.computeVertexNormals();
+        this.object.verticesNeedUpdate = true;
+        Polymer.dom(this).parentNode.addGeom(this.object);
+      },
+      ready: function () {
+        this.newGeo();
+      }
+    });
+  </script>
+</dom-module>
+
+<dom-module id="three-js-meshlines">
+  <script>
+    Polymer({
+      is: 'three-js-meshlines',
+      properties: {
+        slices: { notify: true },
+        stacks: { notify: true }
+      },
+      newGeo: function () {
+        this.object = new THREE.Geometry();
+        this.count = 0;
+        //Keep track of number of vertices added.
+        var slices = Number(this.slices);
+        var stacks = Number(this.stacks);
+        this.length = (slices + 1) * (stacks + 1);
+      },
+      //Total number of vertices.
+      meshLines: function () {
+        var i, j, p;
+        var slices = Number(this.slices);
+        var stacks = Number(this.stacks);
+        var sliceCount = slices + 1;
+        var a, b, c, d;
+        var material = new THREE.LineBasicMaterial({ color: 16711680 });
+        var verts = this.object.vertices;
+        this.lines = [];
+        for (i = 0; i < stacks; i++) {
+          this.lines.push(new THREE.Geometry());
+          for (j = 0; j < slices; j++) {
+            a = verts[i * sliceCount + j];
+            this.lines[i].vertices.push(a);
+          }
+          this.newLine = new THREE.Line(this.lines[i], material);
+          this.parentNode.parentNode.scene.add(this.newLine);
+        }
+        for (i = stacks; i < slices + stacks; i++) {
+          this.lines.push(new THREE.Geometry());
+          for (j = 0; j < stacks; j++) {
+            a = verts[j * (stacks + 1) + i - stacks];
+            this.lines[i].vertices.push(a);
+          }
+          this.newLine = new THREE.Line(this.lines[i], material);
+          this.parentNode.parentNode.scene.add(this.newLine);
+        }
+      },
+      addVertex: function (vertex) {
+        this.object.vertices.push(vertex.object);
+        this.count++;
+        if (this.count == this.length) {
+          this.meshLines();
+        }
+      },
+      replaceVertex: function (oldVertex, newVertex) {
+        if (this.object == undefined || this.count<this.length)
+          return;
+        var index = this.object.vertices.indexOf(oldVertex);
+        this.object.vertices[index] = newVertex;
+        this.meshLines();
+      },
+      ready: function () {
+        this.newGeo();
+      }
     });
   </script>
 </dom-module>
