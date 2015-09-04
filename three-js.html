@@ -157,7 +157,7 @@
     },
     addToParent3: function () {
       parentNode = Polymer.dom(this).parentNode;
-      if (parentNode.addToScene && !this.objectParent) {
+      if (parentNode && parentNode.addToScene && !this.objectParent) {
         this.objectParent = parentNode;
         parentNode.addToScene(this.object);
       }
@@ -307,9 +307,11 @@
         }
         this.object.visible = this.visible;
       },
-      ready: function (){
-        this.init();
-        Polymer.dom(this).parentNode.addMaterial(this.object);
+      attached: function (){
+        this.async(function (){
+          this.init();
+          Polymer.dom(this).parentNode.addMaterial(this.object);
+        });
       },
       /*
       createEdges: function (mesh) {
@@ -332,7 +334,8 @@
       },*/
       //console.log('[%s]: REMOVED from threejs-object parent', this.localName + (this.id ? '#' + this.id : ''));
       objectChanged: function () {
-        Polymer.dom(this).parentNode.addMaterial(this.object);
+        if (Polymer.dom(this).parentNode!=null)
+          Polymer.dom(this).parentNode.addMaterial(this.object);
       }
     });
   </script>
@@ -357,10 +360,12 @@
         },
         object: { value: null }
       },
-      ready: function () {
-        this.object = new THREE.PerspectiveCamera(this.fov, this.aspect, 0.1, 10000);
-        this.object.lookAt(new THREE.Vector3(0, 0, 0));
-        this.addToParent3();
+      attached: function () {
+        this.async(function (){
+          this.object = new THREE.PerspectiveCamera(this.fov, this.aspect, 0.1, 10000);
+          this.object.lookAt(new THREE.Vector3(0, 0, 0));
+          this.addToParent3();
+        });
       },
     });
   </script>
@@ -409,7 +414,7 @@
         }
       },
       behaviors: [ThreeJSObjectBehavior],
-      ready: function () {
+      attached: function () {
         var kind = this.kinds[this.kind] || this.kinds.point;
         //console.log(kind);
         this.object = new THREE[kind](this.color, this.intensity, this.distance, this.angle * Math.PI / 180, this.exponent);
@@ -423,7 +428,9 @@
           this.object.shadowBias = 0.0001;
           this.object.shadowDarkness = 0.5;
         }
-        this.addToParent3();
+        this.async(function () {
+          this.addToParent3();
+        });
       },
     });
   </script>
@@ -459,9 +466,11 @@
           observer: 'newGeo'
         }
       },
-      ready: function () {
+      attached: function () {
         this.extentChanged();
-        this.newGeo();
+        this.async(function() {
+          this.newGeo();
+        });
       },
       extentChanged: function () {
         if (this.extent) {
@@ -471,7 +480,8 @@
       newGeo: function () {
         //console.log("New Geo called");
         this.object = new THREE.BoxGeometry(this.w, this.h, this.d);
-        Polymer.dom(this).parentNode.addGeom(this.object);
+        if(Polymer.dom(this).parentNode)
+          Polymer.dom(this).parentNode.addGeom(this.object);
       }
     });
   </script>
@@ -489,12 +499,15 @@
           observer: 'newGeo'
         }
       },
-      ready: function () {
-        this.newGeo();
+      attached: function () {
+        this.async(function() {
+          this.newGeo();
+        });
       },
       newGeo: function () {
         this.object = new THREE.SphereGeometry(this.r, 32, 16);
-        Polymer.dom(this).parentNode.addGeom(this.object);
+        if(Polymer.dom(this).parentNode)
+          Polymer.dom(this).parentNode.addGeom(this.object);
       }
     });
   </script>
@@ -524,13 +537,15 @@
           observer: 'newGeo'
         }
       },
-      ready: function () {
-        this.newGeo();
+      attached: function () {
+        this.async(function() {
+          this.newGeo();
+        });
       },
       newGeo: function () {
         this.object = new THREE.CylinderGeometry(this.top, this.bottom, this.height, 32, 16);
-        Polymer.dom(this).parentNode.addGeom(this.object);
-      }
+        if(Polymer.dom(this).parentNode)
+          Polymer.dom(this).parentNode.addGeom(this.object);      }
     });
   </script>
 </dom-module>
@@ -553,13 +568,15 @@
           observer: 'newGeo'
         }
       },
-      ready: function () {
-        this.newGeo();
+      attached: function () {
+        this.async(function() {
+          this.newGeo();
+        });
       },
       newGeo: function () {
         this.object = new THREE.TorusGeometry(this.r, this.tube, 32, 32);
-        Polymer.dom(this).parentNode.addGeom(this.object);
-      }
+        if(Polymer.dom(this).parentNode)
+          Polymer.dom(this).parentNode.addGeom(this.object);      }
     });
   </script>
 </dom-module>
@@ -582,8 +599,10 @@
         observer: 'newGeo'
       }
     },
-    ready: function () {
-      this.newGeo();
+    attached: function () {
+      this.async(function() {
+        this.newGeo();
+      });
     },
     newGeo: function () {
       var pyramid = new THREE.Geometry();
@@ -601,8 +620,8 @@
       pyramid.computeFaceNormals();
       pyramid.computeBoundingSphere();
       this.object = pyramid;
-      Polymer.dom(this).parentNode.addGeom(this.object);
-    }
+      if(Polymer.dom(this).parentNode)
+        Polymer.dom(this).parentNode.addGeom(this.object);    }
   });
 </script>
 </dom-module>
@@ -634,18 +653,22 @@
       },
       addToGeom: function () {
         this.objectParent = Polymer.dom(this).parentNode;
-        Polymer.dom(this).parentNode.addVertex(this);
+        if(Polymer.dom(this).parentNode)
+          Polymer.dom(this).parentNode.addVertex(this);
       },
       //console.log('[%s]: added to threejs-geometry parent', this.localName + (this.id ? '#' + this.id : ''));
       replaceInGeom: function (newValue, oldValue) {
         this.objectParent = Polymer.dom(this).parentNode;
         oldVertex = this.object;
         this.object = new THREE.Vector3(this.x, this.y, this.z);
+        if(this.objectParent)
         this.objectParent.replaceVertex(oldVertex, this.object);
       },
-      ready: function () {
-        this.object = new THREE.Vector3(this.x, this.y, this.z);
-        this.addToGeom();
+      attached: function () {
+        this.async(function() {
+          this.object = new THREE.Vector3(this.x, this.y, this.z);
+          this.addToGeom();
+        });
       }
     });
   </script>
@@ -715,7 +738,8 @@
         if (this.count == this.length) {
           this.object.computeFaceNormals();
           this.object.computeVertexNormals();
-          Polymer.dom(this).parentNode.addGeom(this.object);
+          if(Polymer.dom(this).parentNode)
+            Polymer.dom(this).parentNode.addGeom(this.object);
         }
       },
       replaceVertex: function (oldVertex, newVertex) {
@@ -726,10 +750,13 @@
         this.object.computeFaceNormals();
         this.object.computeVertexNormals();
         this.object.verticesNeedUpdate = true;
-        Polymer.dom(this).parentNode.addGeom(this.object);
+        if(Polymer.dom(this).parentNode)
+          Polymer.dom(this).parentNode.addGeom(this.object);
       },
-      ready: function () {
-        this.newGeo();
+      attached: function () {
+        this.async(function (){
+          this.newGeo();
+        });
       }
     });
   </script>
@@ -740,8 +767,14 @@
     Polymer({
       is: 'three-js-meshlines',
       properties: {
-        slices: { notify: true },
-        stacks: { notify: true }
+        slices: {
+          type: Number,
+          notify: true
+        },
+        stacks: {
+          type :Number,
+          notify: true
+        }
       },
       newGeo: function () {
         this.object = new THREE.Geometry();
@@ -768,7 +801,8 @@
             this.lines[i].vertices.push(a);
           }
           this.newLine = new THREE.Line(this.lines[i], material);
-          this.parentNode.parentNode.scene.add(this.newLine);
+          if(Polymer.dom(this).parentNode.parentNode)
+            Polymer.dom(this).parentNode.parentNode.scene.add(this.newLine);
         }
         for (i = stacks; i < slices + stacks; i++) {
           this.lines.push(new THREE.Geometry());
@@ -777,7 +811,8 @@
             this.lines[i].vertices.push(a);
           }
           this.newLine = new THREE.Line(this.lines[i], material);
-          this.parentNode.parentNode.scene.add(this.newLine);
+          if(Polymer.dom(this).parentNode)
+            Polymer.dom(this).parentNode.parentNode.scene.add(this.newLine);
         }
       },
       addVertex: function (vertex) {
@@ -794,8 +829,10 @@
         this.object.vertices[index] = newVertex;
         this.meshLines();
       },
-      ready: function () {
-        this.newGeo();
+      attached: function () {
+        this.async(function (){
+          this.newGeo();
+        });
       }
     });
   </script>
